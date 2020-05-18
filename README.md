@@ -5,9 +5,7 @@ An elixir app that allows "replaying" of Daily Fantasy Contests to see what the 
 To process this data, the broadway library was used which made it easy to process events using Kafka. After all the events are processed, they are inserted into Elasticsearch.
 
 ## Demo
-![Demo](demo.gif)
-
-![Data Flow](data_flow.png)
+![Demo](demo.gif) ![Data Flow](data_flow.png)
 
 ### Requirements
 * Elixir
