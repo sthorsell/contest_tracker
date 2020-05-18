@@ -22,4 +22,5 @@ Note: If data retention is not setup this will write a large amount of data to K
 3. Run `docker-compose up` to start Kafka/Elasticsearch.
 4. Create an events topic, and an entries Kafka topic.
 5. Run `iex -S mix run phx.server`
-6. (Optional) Kick off data loading process by running `ContestTracker.Ingest.Statistics.parse`
+6. (Optional) `unzip data/contest-standings-85042224.csv.zip`
+7. (Optional) Kick off data loading process by running `ContestTracker.Ingest.Statistics.parse`

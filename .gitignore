@@ -34,3 +34,4 @@ npm-debug.log
 /priv/static/
 
 *.DS_STORE
+data/contest-standings-85042224.csv
