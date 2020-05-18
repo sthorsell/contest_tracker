@@ -51,13 +51,15 @@ defmodule ContestTracker.Ingest.Statistics do
     Enum.reduce(plays, %{}, fn play, acc ->
       Enum.reduce(play["players"], acc, fn {player, stats}, acc ->
         [%{"clubcode" => team, "playerName" => name} | _] = stats
-        converted_stats = Enum.map(stats, &parse_stat/1)
-        |> Enum.reject(&is_nil/1)
+
+        converted_stats =
+          Enum.map(stats, &parse_stat/1)
+          |> Enum.reject(&is_nil/1)
 
         if Enum.empty?(converted_stats) do
-        	acc
+          acc
         else
-        	Map.update(acc, {player, name, team}, converted_stats, &(&1 ++ converted_stats))
+          Map.update(acc, {player, name, team}, converted_stats, &(&1 ++ converted_stats))
         end
       end)
     end)
@@ -89,18 +91,20 @@ defmodule ContestTracker.Ingest.Statistics do
       "drives" => drives
     } = updates
 
-    drive_list = Enum.map(Map.delete(drives, "crntdrv"), fn {seq, drive} ->
-      Map.put(drive, "sequence", seq)
-    end)
+    drive_list =
+      Enum.map(Map.delete(drives, "crntdrv"), fn {seq, drive} ->
+        Map.put(drive, "sequence", seq)
+      end)
 
     plays =
       Enum.map(drive_list, fn drive ->
         drive_info = Map.delete(drive, "plays")
+
         Enum.map(drive["plays"], fn {play_id, play} ->
           Map.merge(play, %{quarter: drive["qtr"], drive: drive_info, id: play_id})
         end)
       end)
-      |> List.flatten
+      |> List.flatten()
       |> Enum.sort_by(&String.to_integer(&1.id))
 
     scoring_plays = Enum.filter(plays, &Enum.member?(Map.keys(@score_types), &1["note"]))
@@ -129,8 +133,8 @@ defmodule ContestTracker.Ingest.Statistics do
             Enum.filter(statistics, &(&1.team == abbr && Enum.member?(Map.keys(&1), :passing)))
             |> Enum.reduce(%{ints: 0, sacks: 0}, fn stats, res ->
               Enum.reduce([:sacks, :ints], res, fn category, res ->
-              	value = Map.get(stats.passing, category, 0)
-              	Map.update(res, category, value, &(&1 + value))
+                value = Map.get(stats.passing, category, 0)
+                Map.update(res, category, value, &(&1 + value))
               end)
             end)
           end)
@@ -143,7 +147,14 @@ defmodule ContestTracker.Ingest.Statistics do
           ])
           |> Enum.map(&ContestTracker.Ingest.Scoring.calc_score/1)
 
-        {%{description: play["desc"], id: play.id, play: play, statistics: statistics, sequence: String.to_integer(play.id), score: score}, play_list}
+        {%{
+           description: play["desc"],
+           id: play.id,
+           play: play,
+           statistics: statistics,
+           sequence: String.to_integer(play.id),
+           score: score
+         }, play_list}
       end)
 
     # topic = "events"

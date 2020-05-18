@@ -35,8 +35,10 @@ defmodule ContestTracker.Contests.Lineups do
       cols = String.split(row, ",")
       [display_name, lineup] = Enum.map([2, 5], &Enum.at(cols, &1))
       [username | _] = String.split(display_name, " ")
-      {_, players} = String.split(lineup, ~r/\s?(FLEX|CPT)\s\s?/)
-      |> Enum.split(1)
+
+      {_, players} =
+        String.split(lineup, ~r/\s?(FLEX|CPT)\s\s?/)
+        |> Enum.split(1)
 
       {username, Enum.map(players, &String.trim/1)}
     end)

@@ -7,12 +7,14 @@ defmodule ContestTracker.Processors.EntryProcessor do
     Broadway.start_link(__MODULE__,
       name: __MODULE__,
       producer: [
-        module: {BroadwayKafka.Producer, [
-          hosts: [localhost: 29092],
-          group_id: "group_1",
-          topics: ["entries"],
-          offset_reset_policy: :earliest
-        ]},
+        module:
+          {BroadwayKafka.Producer,
+           [
+             hosts: [localhost: 29092],
+             group_id: "group_1",
+             topics: ["entries"],
+             offset_reset_policy: :earliest
+           ]},
         concurrency: 40
       ],
       processors: [
@@ -37,13 +39,16 @@ defmodule ContestTracker.Processors.EntryProcessor do
 
   @impl true
   def handle_batch(_, messages, _, _) do
-    payload = Enum.map(messages, fn msg ->
-      data = msg.data
-      |> Map.put("winning", 0.0)
-      |> Map.put("points", msg.data["points"] / 1)
-      [%{index: %{"_index" => "entries", "_type" => "entry"}}, data]
-    end)
-    |> List.flatten
+    payload =
+      Enum.map(messages, fn msg ->
+        data =
+          msg.data
+          |> Map.put("winning", 0.0)
+          |> Map.put("points", msg.data["points"] / 1)
+
+        [%{index: %{"_index" => "entries", "_type" => "entry"}}, data]
+      end)
+      |> List.flatten()
 
     {:ok, _} = ContestTracker.Search.bulk("entries", "entry", payload)
 
