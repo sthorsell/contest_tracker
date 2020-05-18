@@ -1,4 +1,7 @@
 defmodule ContestTracker.Contests.Lineups do
+  @moduledoc """
+  Module responsible for loading and retrieving contest lineups.
+  """
   use Agent
 
   @doc """

@@ -1,4 +1,7 @@
 defmodule ContestTracker.Contests.Entries do
+  @moduledoc """
+  Module responsible for loading and modifying contest entries via Elasticsearch.
+  """
   alias ContestTracker.Search
 
   def get_plays do

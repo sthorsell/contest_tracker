@@ -14,9 +14,9 @@ defmodule ContestTracker.Application do
       # Start the Endpoint (http/https)
       ContestTrackerWeb.Endpoint,
       ContestTracker.Contests.Summaries,
-      # ContestTracker.Contests.Lineups,
-      # ContestTracker.Processors.EventProcessor,
-      # ContestTracker.Processors.EntryProcessor   
+      ContestTracker.Contests.Lineups,
+      ContestTracker.Processors.EventProcessor,
+      ContestTracker.Processors.EntryProcessor
       # Start a worker by calling: ContestTracker.Worker.start_link(arg)
       # {ContestTracker.Worker, arg}
     ]

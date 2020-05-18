@@ -1,4 +1,7 @@
 defmodule ContestTracker.Ingest.Statistics do
+  @moduledoc """
+  Module responsible for retrieving and publishing game statistics/events.
+  """
   @score_types %{
     "XPM" => 0,
     "XP" => 1,

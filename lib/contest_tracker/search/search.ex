@@ -1,4 +1,7 @@
 defmodule ContestTracker.Search do
+	@moduledoc """
+	Module responsible for communicating with Elasticsearch.
+	"""
 	import Elastix.HTTP, only: [prepare_url: 2]
   alias Elastix.{HTTP, JSON}
 

@@ -1,4 +1,7 @@
 defmodule ContestTracker.Contests.Summaries do
+  @moduledoc """
+  Module responsible for loading and retrieving contest summary information.
+  """
   use Agent
 
   @doc """
@@ -26,7 +29,7 @@ defmodule ContestTracker.Contests.Summaries do
     Agent.update(__MODULE__, &Map.put(&1, key, value))
   end
 
-  defp load_summary() do 
+  defp load_summary() do
     Jason.decode!(File.read!("data/contest.json"))
   end
 end

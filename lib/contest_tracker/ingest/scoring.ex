@@ -1,4 +1,7 @@
-defmodule ContestTracker.Ingest.Scoring do 
+defmodule ContestTracker.Ingest.Scoring do
+  @moduledoc """
+  Module responsible for calculating fantasy points.
+  """
 	@scoring_map %{
     passing: %{yards: 0.04, touchdowns: 4, ints: -1},
     rushing: %{yards: 0.1, touchdowns: 6},
@@ -8,23 +11,23 @@ defmodule ContestTracker.Ingest.Scoring do
   }
 
   def calculate(nil, _), do: 0
-	def calculate(stats, props) do 
-		Enum.reduce(props, 0, fn {prop, value}, res -> 
+	def calculate(stats, props) do
+		Enum.reduce(props, 0, fn {prop, value}, res ->
 			Map.get(stats, prop, 0) * value + res
 		end)
 	end
 
 	def score_for(_, nil), do: 0
-	def score_for(:defense, stats) do 
+	def score_for(:defense, stats) do
 		defense_points(stats.points) + calculate(stats, @scoring_map.defense)
 	end
-  def score_for(:passing, stats) do 
+  def score_for(:passing, stats) do
     passing_yards_bonus(stats.yards) + calculate(stats, @scoring_map.passing)
   end
-  def score_for(:kicking, stats) do 
+  def score_for(:kicking, stats) do
     calculate(stats, @scoring_map.kicking)
   end
-  def score_for(category, stats) when category in [:rushing, :receiving] do 
+  def score_for(category, stats) when category in [:rushing, :receiving] do
     yards_bonus(stats.yards) + calculate(stats, Map.get(@scoring_map, category))
   end
 
@@ -45,7 +48,7 @@ defmodule ContestTracker.Ingest.Scoring do
   def round_points(pts), do: Float.round(pts, 2)
 
 	def calc_score(stats) do
-		points = Enum.reduce([:passing, :rushing, :receiving, :defense, :kicking], 0, fn category, res -> 
+		points = Enum.reduce([:passing, :rushing, :receiving, :defense, :kicking], 0, fn category, res ->
       score_for(category, Map.get(stats, category)) + res
 		end)
 
