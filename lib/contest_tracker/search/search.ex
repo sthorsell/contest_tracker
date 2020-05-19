@@ -8,7 +8,6 @@ defmodule ContestTracker.Search do
   @url Application.fetch_env!(:elastix, :host)
 
   def create_indices do
-    # Elastix.Index.create("http://localhost:9200", "entries", %{mappings: @mapping})
     Elastix.Index.create(@url, "entries", %{})
   end
 

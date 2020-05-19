@@ -16,10 +16,6 @@ defmodule ContestTracker.Ingest.Statistics do
   defp get_side(%{"posteam" => side}, home_abbr) when side == home_abbr, do: :home
   defp get_side(%{"posteam" => side}, home_abbr) when side != home_abbr, do: :away
 
-  def convert_stat(yards, touchdowns \\ 0, passing \\ false) do
-    %{yards: yards, touchdowns: touchdowns, dk_points: touchdowns * 6 + yards / 10}
-  end
-
   def parse_stat(%{"statId" => 10, "yards" => yds}), do: %{rushing: %{yards: yds}}
   def parse_stat(%{"statId" => 11, "yards" => yds}), do: %{rushing: %{yards: yds, touchdowns: 1}}
   def parse_stat(%{"statId" => 12, "yards" => yds}), do: %{rushing: %{yards: yds}}
@@ -27,8 +23,8 @@ defmodule ContestTracker.Ingest.Statistics do
   def parse_stat(%{"statId" => 15, "yards" => yds}), do: %{passing: %{yards: yds}}
   def parse_stat(%{"statId" => 16, "yards" => yds}), do: %{passing: %{yards: yds, touchdowns: 1}}
   def parse_stat(%{"statId" => 17, "yards" => yds}), do: %{passing: %{yards: yds}}
-  def parse_stat(%{"statId" => 18, "yards" => yds}), do: %{passing: %{touchdowns: 1}}
-  def parse_stat(%{"statId" => 19, "yards" => yds}), do: %{passing: %{ints: 1}}
+  def parse_stat(%{"statId" => 18, "yards" => _}), do: %{passing: %{touchdowns: 1}}
+  def parse_stat(%{"statId" => 19, "yards" => _}), do: %{passing: %{ints: 1}}
   def parse_stat(%{"statId" => 20}), do: %{passing: %{sacks: 1}}
 
   def parse_stat(%{"statId" => 21, "yards" => yds}) do
@@ -40,7 +36,7 @@ defmodule ContestTracker.Ingest.Statistics do
   end
 
   def parse_stat(%{"statId" => 23, "yards" => yds}), do: %{receiving: %{yards: yds}}
-  def parse_stat(%{"statId" => 24, "yards" => yds}), do: %{receiving: %{touchdowns: 1}}
+  def parse_stat(%{"statId" => 24, "yards" => _}), do: %{receiving: %{touchdowns: 1}}
   def parse_stat(%{"statId" => 70, "yards" => yds}) when yds < 40, do: %{kicking: %{fg_3: 1}}
   def parse_stat(%{"statId" => 70, "yards" => yds}) when yds < 50, do: %{kicking: %{fg_4: 1}}
   def parse_stat(%{"statId" => 70, "yards" => yds}) when yds >= 50, do: %{kicking: %{fg_5: 1}}
@@ -87,7 +83,6 @@ defmodule ContestTracker.Ingest.Statistics do
     %{
       "home" => %{"abbr" => home_abbr},
       "away" => %{"abbr" => away_abbr},
-      "scrsummary" => scores,
       "drives" => drives
     } = updates
 
@@ -157,23 +152,24 @@ defmodule ContestTracker.Ingest.Statistics do
          }, play_list}
       end)
 
-    # topic = "events"
-    # client_id = :events_client
-    # hosts = [localhost: 29092]
+    topic = "events"
+    client_id = :events_client
+    hosts = [localhost: 29092]
 
-    # :ok = :brod.start_client(hosts, client_id, _client_config=[])
-    # :ok = :brod.start_producer(client_id, topic, _producer_config = [])
-    # Enum.each(res, fn play ->
-    # 	partition = rem(String.to_integer(play.id), 3)
-    # 	 :ok = :brod.produce_sync(client_id, topic, partition, _key="", Jason.encode!(play))
-    # end)
+    :ok = :brod.start_client(hosts, client_id, _client_config=[])
+    :ok = :brod.start_producer(client_id, topic, _producer_config = [])
+    Enum.each(res, fn play ->
+    	partition = rem(String.to_integer(play.id), 3)
+    	 :ok = :brod.produce_sync(client_id, topic, partition, _key="", Jason.encode!(play))
+    end)
 
-    # payload = Enum.map(res, fn msg ->
-    #   [%{index: %{"_index" => "plays", "_type" => "play"}}, Map.take(msg, [:id, :play, :description, :sequence, :score])]
-    # end)
-    # |> List.flatten
+    payload = Enum.map(res, fn msg ->
+      [%{index: %{"_index" => "plays", "_type" => "play"}}, Map.take(msg, [:id, :play, :description, :sequence, :score])]
+    end)
+    |> List.flatten
 
-    # Elastix.Bulk.post("http://localhost:9200", payload, index: "plays", type: "play")
+    ContestTracker.Search.bulk("plays", "play", payload)
+
     res
   end
 end
